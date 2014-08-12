@@ -48,6 +48,7 @@
   "scripts": {},
   "dependencies": {
     "mongoose": "~3.8.14",
+    "debug": "~1.0.4",
     "jade": "~1.5.0"
   },
   "devDependencies": {
