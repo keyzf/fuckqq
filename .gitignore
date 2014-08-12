@@ -1,0 +1,4 @@
+*.log
+*.dat
+
+node_modules
