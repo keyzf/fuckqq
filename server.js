@@ -12,13 +12,14 @@
 var http = require('http'),
   url  = require('url'),
   // 第三方package
-  debug = require('debug')('server');
+  debug = require('debug')('server'),
   // 本地module
+  cfg = require('./config');
 
 
 
 exports.start = function (route, config) {
-	var port = process.env.PORT || 8888;
+	var port = cfg.port;
 
 	http.createServer(function onRequest (request, response) {
 		var pathname = url.parse(request.url).pathname;
@@ -26,5 +27,5 @@ exports.start = function (route, config) {
 		route(pathname, config, request, response);
 	}).listen(port);
 
-	debug('server start: ', port);
+	debug('server start: %d', port);
 };

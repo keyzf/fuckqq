@@ -11,10 +11,9 @@
 
 var server = require('./server').start,
 	router = require('./router').route,
-	requestHandler = require('./requestHandlers');
-	// db = require('./db');
-
-// db.dbConnect();
+	requestHandler = require('./requestHandlers'),
+	cfg = require('./config'),
+	models = require('./models');
 
 var config = {};
 config['/'] = requestHandler.home;

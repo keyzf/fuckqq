@@ -52,6 +52,14 @@
 * browser-sync
 
 
+2014/8/14 9:14 提交日志
+
+* 前端界面加入了bootstrap 3.2.0以及jquery－2.1.1依赖，前端界面采用bootstrap进行布局
+* 服务端又加入了utility 1.0.0依赖
+* 实现了静态文件的路由处理（初级，不严密，无验证，不完善）
+* 实现了注册，保存用户信息
+* 接下去还需要添加session和cookie功能，用来保存用户的登录状态。
+
 
 &copy;xiaohuame — All Rights Reserved.
 
