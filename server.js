@@ -21,7 +21,7 @@ var http = require('http'),
 exports.start = function (route, config) {
 	var port = cfg.port;
 
-	http.createServer(function onRequest (request, response) {
+	http.createServer(function (request, response) {
 		var pathname = url.parse(request.url).pathname;
 
 		route(pathname, config, request, response);
