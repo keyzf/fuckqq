@@ -9,21 +9,6 @@
  */
 
 
-// var server = require('./server').start,
-// 	router = require('./router').route,
-// 	requestHandler = require('./requestHandlers'),
-// 	cfg = require('./config'),
-// 	models = require('./models');
-
-// var config = {};
-// config['/'] = requestHandler.home;
-// config['/reg'] = requestHandler.reg;
-
-// server(router, config);
-
-
-
-
 var http = require('http'),
   url  = require('url'),
   fs = require('fs'),
@@ -37,7 +22,8 @@ var http = require('http'),
   requestHandlers = require('./requestHandlers');
 
 var routes = app.routes,
-	match = app.match;
+	match = app.match,
+	handle = app.handle;
 
 app.get('/', requestHandlers.home);
 
@@ -52,10 +38,11 @@ app.post('/reg/:username', function (req, res) {
 
 var handle404 = function (req, res) {
 
-	return false;
+	debug('%s 404', req.url);
+	// res.end('404 error');
+
 };
 
-// exports.start = function (route, config) {
 var port = cfg.port;
 
 http.createServer(function (req, res) {
@@ -75,39 +62,27 @@ http.createServer(function (req, res) {
 				res.end(file);
 			}
 		});
+		return;
 	}
 	// 处理路由
 	var method = req.method.toLowerCase();
 
-	if (routes.hasOwnProperty(method) && match(pathname, routes[method], req, res) ||
-			match(pathname, routes.all, req, res)) {
-		return;
+	var stacks = match(pathname, routes.all, req, res);
+	if (routes.hasOwnProperty(method)) {
+		// 根据请求方法奋发，获取相关的中间件
+		stacks = stacks.concat(match(pathname, routes[method], req, res));
 	}
 
-	// if (routes.hasOwnProperty(method)) {
-	// 	if (match(pathname, routes[method])) {
-	// 		// 根据请求方法分支
-	// 		return;
-	// 	}
-	// 	else {
-	// 		// 如果路径没有匹配成功，尝试让all()来处理
-	// 		if (match(pathname, routes.all)) {
-	// 			return;
-	// 		}
-	// 	}
-	// }
-	// else {
-	// 	// 直接让all()来处理
-	// 	if (match(pathname, routes.all)) {
-	// 		return;
-	// 	}
-	// }
-
-	handle404(req, res);
+	if (stacks.length) {
+		handle(req, res, stacks);
+	}
+	else {
+		// do somthing for 404 error
+		handle404(req, res);
+	}
 }).listen(port);
 
 debug('server start: %d', port);
-// };
 
 
 

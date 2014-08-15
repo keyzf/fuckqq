@@ -15,7 +15,7 @@ var mongoose = require('mongoose'),
 
 mongoose.connect(cfg.db, function(err) {
 	if (err) {
-		debug('connect to %s error: ', cofnig.db, err.message);
+		debug('connect to %s error: ', cfg.db, err.message);
 		process.exit(1);
 	}
 });

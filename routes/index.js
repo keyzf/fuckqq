@@ -10,6 +10,9 @@
 
 // var url = require('url');
 
+
+var slice = Array.prototype.slice;
+
 var pathRegexp = function (path) {
 	var keys = [];
 
@@ -40,28 +43,60 @@ var pathRegexp = function (path) {
 var routes = {'all': []},
 	app = {};
 
-var use = function (path, action) {
-	routes.push([pathRegexp(path), action]);
+var use = function (path) {
+	var handle;
+	if (typeof path === 'string') {
+		handle = {
+			path: pathRegexp(path),
+			stack: slice.call(arguments, 1)
+		};
+	}
+	else {
+		handle = {
+			path: pathRegexp('/'),
+			// 其他的都是处理单元
+			stack: slice.call(arguments, 0)
+		};
+	}
+
+	routes.all.push(handle);
 };
 
 // Create, Read, Update, Delete 
 ['post', 'get', 'put', 'delete'].forEach(function (method) {
 	routes[method] = [];
-	app[method] = function (path, action) {
-		routes[method].push([pathRegexp(path), action]);
+	app[method] = function (path) {
+		routes[method].push({
+			path: pathRegexp(path),
+			stack: slice.call(arguments, 1)
+		});
 	};
 });
+
+var handle = function (req, res, stack) {
+	var next = function () {
+		// 从stack数组中取出中间件并执行
+		var middleware = stack.shift();
+		if (middleware) {
+			// 传入next()函数自身，使中间件能够执行结束后递归
+			middleware(req, res, next);
+		}
+	};
+
+	// 启动执行
+	next();
+};
 
 var match = function (pathname, routes, req, res) {
 	var i = 0,
 		l_r = routes.length,
-		route;
+		route, stacks = [];
 
 	for (; i<l_r; i++) {
 		route = routes[i];
 		// 正则匹配
-		var reg = route[0].regexp;
-		var keys = route[0].keys;
+		var reg = route.path.regexp;
+		var keys = route.path.keys;
 		var matched = reg.exec(pathname);
 
 		if (matched) {
@@ -77,45 +112,16 @@ var match = function (pathname, routes, req, res) {
 				}
 			}
 			req.params = params;
-
-			var action = route[1];
-			action(req, res);
-			return true;
+			// 将中间件都保存起来
+			stacks = stacks.concat(route.stack);
 		}
 	}
-
-	return false;
+	return stacks;
 };
 
 app.routes = routes;
 app.use = use;
+app.handle = handle;
 app.match = match;
 
 module.exports = app;
-
-
-// var onRequest = function (req, res) {
-// 	var pathname = url.parse(req.url).pathname,
-// 		method = req.method.toLowerCase();
-
-// 	if (routes.hasOwnProperty(method)) {
-// 		if (match(pathname, routes[method])) {
-// 			// 根据请求方法分支
-// 			return;
-// 		}
-// 		else {
-// 			// 如果路径没有匹配成功，尝试让all()来处理
-// 			if (match(pathname, routes.all)) {
-// 				return;
-// 			}
-// 		}
-// 	}
-// 	else {
-// 		// 直接让all()来处理
-// 		if (match(pathname, routes.all)) {
-// 			return;
-// 		}
-// 	}
-
-// 	handle404(req, res);
-// };
