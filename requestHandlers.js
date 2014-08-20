@@ -18,7 +18,6 @@ var fs = require('fs'),
 	mime = require('./mime').types,
 	User = require('./models').User,
 	cfg = require('./config');
-	// db = require('./db').db;
 
 var home = function (request, response) {
 	debug('request home page');
